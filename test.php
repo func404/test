@@ -1,6 +1,708 @@
 <?php
+$string='helloworld!';
+$time = test();
+$str="This is a $string $time morning!";
+
+function test()
+{
+  return date('Y-m-d');
+}
+
+$res= eval("return '$str';"); //把代码当成php代码来执行
+echo $res;
+
+die('eval');
+assert_options(ASSERT_ACTIVE,1);
+assert_options(ASSERT_WARNING, 0);
+assert_options(ASSERT_QUIET_EVAL,1);
+
+function my_assert_handler($file='test.php', $line='2', $code='fa')
+{
+    echo "<hr>Assertion Failed:File '$file'<br />Line '$line'<br />Code '$code'<br /><hr />";
+}
+
+ assert_options(ASSERT_CALLBACK, 'my_assert_handler');
+// assert('1==2');
+echo 555555555555; 
+die('断言');
+/**
+ * 表示一个作用于某对象结构中的各元素的操作。它使你可以在不改变各元素的类的前提下定义作用于这些元素的新操作。
+ */
+abstract class Visitor {
+    abstract public function visitConcreteElementA(ConcreteElementA $elementA);
+    abstract public function visitConcreteElementB(concreteElementB $elementB);
+}
+
+abstract class Element
+{
+    abstract public function accept(Visitor $visitor);
+}
+
+
+//具体访问者角色(ConcreteVisitor)
+class ConcreteVisitor1 extends Visitor {
+    public function visitConcreteElementA(ConcreteElementA $elementA) {
+        var_dump($elementA->getName() . " visited by ConcerteVisitor1");
+    }
+    public function visitConcreteElementB(ConcreteElementB $elementB) {
+        var_dump($elementB->getName() . " visited by ConcerteVisitor1");
+    }
+}
+class ConcreteVisitor2 extends Visitor {
+    public function visitConcreteElementA(ConcreteElementA $elementA) {
+        var_dump($elementA->getName() . " visited by ConcerteVisitor2");
+    }
+    public function visitConcreteElementB(ConcreteElementB $elementB) {
+        var_dump($elementB->getName() . " visited by ConcerteVisitor2");
+    }
+}
+
+//具体节点（Node）角色(ConcreteElement)
+class ConcreteElementA extends Element {
+    private $name;
+    public function __construct($name) {
+        $this->name = $name;
+    }
+    public function getName() {
+        return $this->name;
+    }
+    public function accept(Visitor $visitor) {
+        $visitor->visitConcreteElementA($this);
+    }
+}
+class ConcreteElementB extends Element {
+    private $name;
+    public function __construct($name) {
+        $this->name = $name;
+    }
+    public function getName() {
+        return $this->name;
+    }
+    public function accept(Visitor $visitor) {
+        $visitor->visitConcreteElementB($this);
+    }
+}
+
+//对象结构角色(ObjectStructure)
+class ObjectStructure {
+    private $collection;
+    public function __construct() {
+        $this->collection = array();
+    }
+    public function attach(Element $element) {
+        return array_push($this->collection, $element);
+    }
+    public function detach(Element $element) {
+        $index = array_search($element, $this->collection);
+        if ($index !== FALSE) {
+            unset($this->collection[$index]);
+        }
+        return $index;
+    }
+    public function accept(Visitor $visitor) {
+        foreach ($this->collection as $value) {
+            $value->accept($visitor);
+        }
+    }
+}
+
+$elementA = new ConcreteElementA("ElementA");
+$elementB = new ConcreteElementB("ElementB");
+$elementA2 = new ConcreteElementB("ElementA2");
+$visitor1 = new ConcreteVisitor1();
+$visitor2 = new ConcreteVisitor2();
+
+$os = new ObjectStructure();
+$os->attach($elementA);
+$os->attach($elementB);
+$os->attach($elementA2);
+$os->detach($elementA);
+$os->accept($visitor1);
+$os->accept($visitor2);
+
+die('访问者模式');
+/**
+ * 给定一个语言，定义它的文法的一种表示，并定义一个解释器，这个解释器使用该表示来解释语言中的句子。
+ */
+abstract class AbstractExpression 
+{
+   abstract public function Interpret($context); //解释
+}
+
+//TerminalExpression:终结符表达式
+class TerminalExpression extends AbstractExpression
+{
+    public function Interpret($context)
+    {
+        var_dump('终端解释器');
+    }
+}
+
+
+//NonterminalExpression:非终结符表达式
+class NonterminalExpression extends AbstractExpression
+{
+    public function Interpret($context)
+    {
+        var_dump('非终端解释器');
+    }
+}
+
+
+//Context: 环境类
+class Context
+{
+    public function __set($name, $value)
+    {
+        $this->$name=$value;
+    }
+    public function __get($name)
+    {
+        return $this->$name;
+    }
+}
+
+
+$context=new Context();
+$lists[]=new TerminalExpression();
+$lists[]=new NonterminalExpression();
+$lists[]=new TerminalExpression();
+$lists[]=new NonterminalExpression();     //解释器分段解释内容
+
+foreach ($lists as $value){
+    $value->Interpret($context);
+}
+
+
+
+die('解释器模式');
+/**
+ * 享元模式(Flyweight Pattern)：运用共享技术有效地支持大量细粒度对象的复用。系统只使用少量的对象，而这些对象都很相似，状态变化很小，可以实现对象的多次复用。由于享元模式要求能够共享的对象必须是细粒度对象，因此它又称为轻量级模式，它是一种对象结构型模式。
+ */
+abstract class Flyweight {
+    abstract public function operation($state);
+}
+
+//具体享元角色
+class ConcreteFlyweight extends Flyweight {
+    private $state = null;
+    public function __construct($state) {
+        $this->state = $state;
+    }
+    public function operation($state) {
+        var_dump('具体Flyweight:'.$state);
+    }
+
+}
+
+//不共享的具体享元，客户端直接调用
+class UnsharedConcreteFlyweight extends Flyweight {
+    private $state = null;
+    public function __construct($state) {
+        $this->state = $state;
+    }
+    public function operation($state) {
+        var_dump('不共享的具体Flyweight:'.$state);
+    }
+}
+
+//享元工厂角色
+class FlyweightFactory {
+    private $flyweights;
+    public function __construct() {
+        $this->flyweights = array();
+    }
+    public function getFlyweigth($state) {
+        if (isset($this->flyweights[$state])) {
+            return $this->flyweights[$state];
+        } else {
+            return $this->flyweights[$state] = new ConcreteFlyweight($state);
+        }
+    }
+}
+
+
+$f = new FlyweightFactory();
+$a = $f->getFlyweigth('state A');
+$a->operation("other state A");
+
+$b = $f->getFlyweigth('state B');
+$b->operation('other state B');
+
+/* 不共享的对象，单独调用 */
+$u = new UnsharedConcreteFlyweight('state A');
+$u->operation('other state A');
+die('享元模式');
+/**
+ * 用一个中介对象来封装一系列的对象交互，中介者使各对象不需要显式地相互引用，从而使其耦合松散，而且可以独立地改变它们之间的交互。中介者模式又称为调停者模式，它是一种对象行为型模式
+ */
+
+//Mediator: 抽象中介者
+abstract class Mediator
+{
+    abstract public function Send($message,$colleague);
+}
+
+//ConcreteMediator: 具体中介者
+class ConcreteMediator extends Mediator
+{
+    public function __set($name, $value)
+    {
+        $this->$name=$value;
+    }
+    public function Send($message, $colleague)
+    {
+        if ($colleague==$this->colleague1){
+            $this->colleague2->Notify($message);
+        }else{
+            $this->colleague1->Notify($message);
+        }
+    }
+}
+
+
+//Colleague: 抽象同事类
+abstract class Colleague
+{
+    public function __construct($mediator)
+    {
+        $this->mediator=$mediator;
+    }
+}
+
+//ConcreteColleague: 具体同事类
+class ConcreteColleague1 extends Colleague
+{
+    public function Send($message){
+        $this->mediator->Send($message,$this);
+    }
+    public function Notify($message){
+        var_dump('1收到消息：'.$message);
+    }
+}
+class ConcreteColleague2 extends Colleague
+{
+    public function Send($message){
+        $this->mediator->Send($message,$this);
+    }
+    public function Notify($message){
+        var_dump('2收到消息：'.$message);
+    }
+}
+
+$concreteMediator = new ConcreteMediator;
+$concreteMediator->colleague1 = new ConcreteColleague1($concreteMediator);
+$concreteMediator->colleague2 = new ConcreteColleague2($concreteMediator);
+
+$concreteMediator->Send('ConcreteColleague1 的任务',$concreteMediator->colleague1);
+$concreteMediator->colleague2->Send('ConcreteColleague2 的任务');
+
+
+die('中介者模式');
+/**
+ * 使多个对象都有机会处理请求，从而避免请求的发送者和接收者之间的耦合关系。将这个对象连成一条链，并沿着这条链传递该请求，直到有一个对象处理它为止。
+ */
+
+/**
+ * //抽象处理者角色(Handler:Approver)
+ */
+abstract class Handler
+{
+  
+    public function SetSuccessor(Handler $successor){
+        $this->successor=$successor;
+    }
+    abstract public function HandleRequest($request);
+}
+
+/**
+ * //具体处理者角色(ConcreteHandler:President)
+ */
+class ConcreteHandle1 extends Handler
+{
+  public function HandleRequest($request)
+  {
+       if($request>=0 && $request<10){
+            var_dump(self::class.':'.$request);
+        }elseif ($this->successor!=null){
+            $this->successor->HandleRequest($request);
+        }
+    
+  }
+}
+
+class ConcreteHandle2 extends Handler
+{
+    public function HandleRequest($request)
+    {
+        if($request>=10 && $request<20){
+            var_dump(self::class.':'.$request);
+        }elseif ($this->successor!=null){
+            $this->successor->HandleRequest($request);
+        }
+    }
+}
+class ConcreteHandle3 extends Handler
+{
+    public function HandleRequest($request)
+    {
+        if($request>=20 && $request<30){
+            var_dump(self::class.':'.$request);
+        }elseif ($this->successor!=null){
+            $this->successor->HandleRequest($request);
+        }
+    }
+}
+
+$h1=new ConcreteHandle1();
+$h2=new ConcreteHandle2();
+$h3=new ConcreteHandle3();
+
+$h1->SetSuccessor($h2);
+// $h2->SetSuccessor($h3);
+$h1->HandleRequest(5);
+$h1->HandleRequest(15);  //如果handel1处理不了，将任务转给handel2,如果handel2处理不了，将任务转给下一个处理这
+// $h1->HandleRequest(25);
+
+
+die('职责链模式');
+/**
+ * 命令模式(Command Pattern)：将一个请求封装为一个对象，从而使我们可用不同的请求对客户进行参数化；对请求排队或者记录请求日志，以及支持可撤销的操作。命令模式是一种对象行为型模式，其别名为动作(Action)模式或事务(Transaction)模式。
+ */
+/**
+ * 抽象命令类
+ */
+abstract class Command 
+{
+  
+  function __construct($receiver)
+  {
+    $this->receiver=$receiver;
+  }
+
+   abstract public function Execute();
+}
+
+/**
+ * 
+ */
+class ConcreteCommand extends Command
+{
+  
+  function __construct($receiver)
+  {
+    parent::__construct($receiver);
+  }
+
+   public function Execute(){
+        $this->receiver->Action();
+    }
+
+}
+
+
+//Invoker: 调用者
+class Invoker
+{
+    public function SetCommand(Command $command){
+        $this->command=$command;
+    }
+    public function ExecuteCommand(){
+        $this->command->Execute();
+    }
+}
+
+
+
+//Receiver: 接收者
+class Receiver
+{
+    public function Action(){
+        var_dump('执行请求');
+    }
+}
+
+
+$invoker = new Invoker;
+$invoker->SetCommand(new ConcreteCommand(new Receiver));
+$invoker->ExecuteCommand();
+
+
+
+
+
+die('命令模式');
+/**
+ * 桥接模式:将抽象部分与它的实现部分分离，使它们都可以独立地变化。它是一种对象结构型模式，又称为柄体(Handle and Body)模式或接口(Interface)模式。
+ */
+
+//Implementor：实现类接口
+abstract class Implementor
+{
+    abstract public function Operation();
+}
+
+//ConcreteImplementor：具体实现类
+class ConcreteImplementorA extends Implementor
+{
+    public function Operation(){
+        var_dump('A的方法执行');
+    }
+}
+
+class ConcreteImplementorB extends Implementor
+{
+    public function Operation(){
+        var_dump('B的方法执行');
+    }
+}
+
+
+//Abstraction：抽象类
+abstract class Abstraction
+{
+    abstract public function Operation();
+}
+
+
+//RefinedAbstraction：扩充抽象类
+class RefinedAbstraction extends Abstraction
+{
+    public function SetImplementor($implementor){
+        $this->implementor=$implementor;
+    }
+    public function Operation(){
+        $this->implementor->Operation();
+    }
+}
+
+
+$a=new RefinedAbstraction();
+$a->SetImplementor(new ConcreteImplementorA());
+$a->Operation();
+// $a->implementor->Operation();
+
+$a->SetImplementor(new ConcreteImplementorB());
+$a->Operation();
+
+die('桥接模式');
+/**
+ * 迭代器模式: 提供一种方法顺序访问一个聚合对象中的各个元素，而不是暴露其内部的表示。
+ */
+//ConcreteIterator:具体迭代器
+class ConcreteIterator implements Iterator
+{
+    private $_key;
+    private $_array;
+    public function __construct($array){
+        $this->_array=$array;
+        $this->_key=0;
+    }
+    public function rewind(){
+        $this->_key=0;
+    }
+    public function valid(){
+        return isset($this->_array[$this->_key]);
+    }
+    public function current(){
+        return $this->_array[$this->_key];
+    }
+    public function key(){
+        return $this->_key;
+    }
+    public function next(){
+        return ++$this->_key;
+    }
+}
+
+
+//ConcreteAggregate:具体聚合类
+class ConcreteAggregate implements IteratorAggregate
+{
+    protected $_arr;
+    public function __construct($array){
+        $this->_arr = $array;
+    }
+    public function getIterator(){
+        return new ConcreteIterator($this->_arr); //迭代器类型
+    }
+}
+
+
+
+$arr = array(5,8,1,3,2);
+$a=new ConcreteAggregate($arr);
+$b=$a->getIterator();
+var_dump($b);//迭代器对象
+foreach($b as $key=>$value){
+    var_dump($key.':'.$value.'<br/>') ;
+}
+
+
+die('迭代器模式');
+/**
+ * 组合模式，将对象组合成树形结构以表示“部分-整体”的层次结构，组合模式使得用户对单个对象和组合对象的使用具有一致性。掌握组合模式的重点是要理解清楚 “部分/整体” 还有 ”单个对象“ 与 “组合对象” 的含义。
+ */
+
+/**
+ * 组合模式
+ */
+//组合中的对象声明接口
+abstract class Component
+{
+    public function __construct($name)
+    {
+        $this->name=$name;
+    }
+    abstract public function Add(Component $c);
+    abstract public function Remove(Component $c);
+    abstract public function Display($depth);
+}
+
+
+//叶子对象
+class Leaf extends Component
+{
+    public function Add(Component $c){
+        var_dump('add');
+    }
+    public function Remove(Component $c){
+        var_dump('Remove');
+    }
+    public function Display($depth){
+        var_dump(str_repeat('-',$depth).$this->name);
+    }
+}
+
+
+//容器对象
+class Composite extends Component
+{
+    private $children=[];
+    public function Add(Component $c){
+        $this->children[]=$c;
+    }
+    public function Remove(Component $c){
+        foreach ($this->children as $child){
+            if ($child!= $c){
+                $a[]=$child;
+            }
+        }
+        $this->children=$a;
+    }
+    public function Display($depth){
+        var_dump(str_repeat('-',$depth).$this->name);
+        foreach ($this->children as $value){
+            $value->Display($depth+2);
+        }
+    }
+}
+
+
+$root=new Composite('root');
+$root->Add(new Leaf('Leaf A'));
+$root->Add(new Leaf('Leaf B'));
+
+$comp=new Composite('Composite X');
+$comp->Add(new Leaf('Leaf XA'));
+$comp->Add(new Leaf('Leaf XB'));
+
+$root->Add($comp);
+
+$comp2=new Composite('Composite XY');
+$comp2->Add(new Leaf('Leaf XYA'));
+$comp2->Add(new Leaf('Leaf XYB'));
+
+$comp->Add($comp2);
+
+$root->Add(new Leaf('Leaf C'));
+$leaf=new Leaf('Leaf D');
+$root->Add($leaf);
+$root->Display(1);
+
+die('组合模式');
+/**
+ * 在不破坏封装性的前提下，捕获一个对象的内部状态，并在该对象之外保存这个状态。这样就可以将该对象恢复到原先保存的状态。
+ */
+
+/**
+ * Originator (发起人)：记录当前时刻的内部状态，负责定义哪些属于备份范围的状态，负责创建和恢复备忘录数据。
+ */
+class Originator 
+{
+  
+    function __construct()
+    {
+     # code...
+    }
+
+    public function __get($name)
+    {
+        return $this->$name;
+    }
+    public function __set($name, $value)
+    {
+        $this->$name=$value;
+    }
+    public function CreateMemento(){
+        return (new Memento($this->state));
+    }
+    public function SetMemento(Memento $memento){
+        $this->state=$memento->GetState();
+    }
+    public function show(){
+        var_dump('State='.$this->state);
+    }
+}
+
+
+/**
+ * Memento(备忘录)
+ * 负责存储发起人对象的内部状态，
+ * 在需要的时候提供发起人需要的内部状态。
+ */
+class Memento
+{
+    public function __construct($state)
+    {
+        $this->state=$state;
+    }
+    public function GetState(){
+        return $this->state;
+    }
+}
+
+/**
+ * Carataker(管理角色)：对备忘录进行管理，修改和获取备忘录。
+ */
+class Carataker 
+{
+  
+   public function SetMemento($value){
+        $this->memento=$value;
+    }
+    public function GetMemento(){
+        return $this->memento;
+    }
+}
+
+$a=new Originator();  //创建发起人
+$a->state='On'; 
+$a->show();   //发起人 state 的状态
+
+$c=new Carataker();  //备忘录管理者创建
+$c->SetMemento($a->CreateMemento());  //发起人创建备忘录，管理者记录备忘录的状态
+
+$a->state='Off';
+$a->show();   //改变发起者的state状态
+
+$a->SetMemento($c->GetMemento()); //恢复发起者存储在管理者中状态
+$a->show();
+
+die('备忘录模式');
 /**
  * 抽象状态类
+ * 状态模式(State Pattern) ：允许一个对象在其内部状态改变时改变它的行为，对象看起来似乎修改了它的类。其别名为状态对象(Objects for States)，状态模式是一种对象行为型模式。
  */
 abstract class State 
 {
@@ -9,7 +711,7 @@ abstract class State
 }
 
 /**
- * 具体状态类
+ * 环境类
  */
 class Context 
 {
@@ -29,21 +731,21 @@ class Context
      return $this->$value ;
   }
 
-  public function request($value='')
+  public function request()
   {
      $this->state->Handle($this);
   }
 }
 
 /**
- * 具体状态类
+ * 具体状态类A
  */
 class ConcreteStateA extends State
 {
   
   function __construct()
   {
-   
+   var_dump('ConcreteStateA');
   }
 
   public function Handle(Context $context)
@@ -52,6 +754,30 @@ class ConcreteStateA extends State
   }
 }
 
+/**
+ * 具体状态类B
+ */
+class ConcreteStateB extends State
+{
+  
+  function __construct()
+  {
+   var_dump('ConcreteStateB');
+  }
+
+  public function Handle(Context $context)
+  {
+    $context->state = new ConcreteStateA();
+  }
+}
+
+
+$a=new Context(new ConcreteStateA());
+$a->Request();  //输出A,B
+$a->Request();  // $context->state=ConcreteStateB  调用输出 A
+$a->Request();  // $context->state=ConcreteStateA  调用输出 B
+$a->Request();  // $context->state=ConcreteStateB  调用输出 A
+  
 die('状态模式');
 /**
  * 观察者模式
@@ -524,8 +1250,8 @@ die;
 /**
  * @Author: smile
  * @Date:   2018-03-20 19:20:46
- * @Last Modified by:   smile
- * @Last Modified time: 2018-06-13 14:36:26
+ * @Last Modified by:   Jingxinpo
+ * @Last Modified time: 2018-06-20 11:37:31
  */
 /**
 * ArrayAccess::offsetExists — 检查一个偏移位置是否存在
